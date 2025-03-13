@@ -17,10 +17,6 @@ const GameRoomSchema = new mongoose.Schema(
     description: {
         type: String
     },
-    participantsAmount: {
-        type: Number,
-        default: 1,
-    },
     createdAt: {
         type: Date,
         default: Date.now(),

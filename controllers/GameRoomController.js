@@ -32,6 +32,8 @@ module.exports.createGameRoom = catchAsync(async (req, res, next) => {
     const data = {...req.body};
     const gameRoom = await GameRoom.create(data);
 
+    //TODO - dodanie Participation twórcy pokoju do utworzonego pokoju
+
     res.status(201).json({
         status: 'success',
         data: {
