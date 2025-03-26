@@ -2,6 +2,11 @@ const Round = require('../models/RoundModel');
 const catchAsync = require('../util/catchAsync');
 const AppError = require('../util/AppError');
 
+const GameRoom = require('../models/GameRoomModel');
+const DocumentExists = require('../util/DocumentExists');
+
+//TODO - weryfikacja czy owner GameRoom dodaje rundy
+
 module.exports.getAllRounds = catchAsync(async (req, res, next) => {
     const rounds = await Round.find({gameRoomId: req.params.gameroom}).sort('-deadLineDate');
 
@@ -32,6 +37,10 @@ module.exports.createRounds = catchAsync(async (req, res, next) => {
     if (!req.body.rounds) {
         return next(new AppError('Provide at least one Round to add', 404));
     }
+
+    const gameRoom = await DocumentExists(req.params.gameroom,GameRoom);
+
+    if(!gameRoom) return next(new AppError('No GameRoom found with this Id', 404))
 
     const data = req.body.rounds.map((round) => {
         return { ...round, gameRoomId: req.params.gameroom };

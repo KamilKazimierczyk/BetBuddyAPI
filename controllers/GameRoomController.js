@@ -1,6 +1,8 @@
 const GameRoom = require('../models/GameRoomModel');
 const catchAsync = require('../util/catchAsync');
-const AppError = require('../util/AppError')
+const AppError = require('../util/AppError');
+
+const Participation = require('../models/ParticipationModel');
 
 module.exports.getAllGameRooms = catchAsync(async (req, res, next) => {
     const gameRooms = await GameRoom.find();
@@ -32,7 +34,7 @@ module.exports.createGameRoom = catchAsync(async (req, res, next) => {
     const data = {...req.body};
     const gameRoom = await GameRoom.create(data);
 
-    //TODO - dodanie Participation twórcy pokoju do utworzonego pokoju
+    //TODO - po autoryzacji dodanie Participation twórcy pokoju do utworzonego pokoju
 
     res.status(201).json({
         status: 'success',

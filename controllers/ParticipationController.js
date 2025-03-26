@@ -3,10 +3,19 @@ const User = require('../models/UserModel');
 const catchAsync = require('../util/catchAsync');
 const AppError = require('../util/AppError');
 
+const GameRoom = require('../models/GameRoomModel');
+const DocumentExists = require('../util/DocumentExists');
+
 module.exports.setParticipation = catchAsync(async (req, res, next) => {
     const data = {...req.body};
 
+    const gameRoom = await DocumentExists(data.gameRoomId,GameRoom);
+
+    if(!gameRoom) return next(new AppError('No GameRoom found with this Id', 404))
+
     const participation = await Participation.create(data);
+
+    ///TODO - dodanie score dla uzytkownika
 
     res.status(201).json({
         status: 'success',
@@ -18,6 +27,10 @@ module.exports.setParticipation = catchAsync(async (req, res, next) => {
 
 module.exports.getGameRoomUsers = catchAsync(async (req, res, next) => {
     const gameRoomId = req.params.gameRoomId;
+
+    const gameRoom = await DocumentExists(gameRoomId,GameRoom);
+
+    if(!gameRoom) return next(new AppError('No GameRoom found with this Id', 404))
 
     const participations = await Participation.find({gameRoomId});
     
