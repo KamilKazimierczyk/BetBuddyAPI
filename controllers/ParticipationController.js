@@ -25,7 +25,26 @@ module.exports.setParticipation = catchAsync(async (req, res, next) => {
     });
 });
 
-module.exports.getGameRoomUsers = catchAsync(async (req, res, next) => {
+module.exports.getGameRoomUsers = async (gameRoomId) => {
+    const gameRoom = await DocumentExists(gameRoomId,GameRoom);
+
+    if(!gameRoom) return new AppError('No GameRoom found with this Id', 404)
+
+    const participations = await Participation.find({gameRoomId});
+    
+    if(participations.length == 0) return new AppError('No Participations found for this game room', 404)
+
+    const userIds = participations.map(item => ({_id: item.userId}));
+
+    const users = await User.find({$or:userIds});
+
+    return {
+        gameRoomId,
+        users,
+    }
+};
+
+module.exports.getGameRoomUsersAPI = catchAsync(async (req, res, next) => {
     const gameRoomId = req.params.gameRoomId;
 
     const gameRoom = await DocumentExists(gameRoomId,GameRoom);

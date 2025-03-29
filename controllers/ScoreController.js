@@ -3,9 +3,9 @@ const catchAsync = require('../util/catchAsync');
 const AppError = require('../util/AppError');
 
 //zwróć tablicę z wynikami dla użytkowników na podstawie tablicy id użytkowników
-module.exports.getScoreLinesForUsers = catchAsync(async (req,res,next) => {
+module.exports.getScoreLinesForUsers = async (req,res,next) => {
     
-})
+}
 
 //pobierz score dla konkretnego użytkownika i konkretnego pokoju
 module.exports.getScoreLineForGameRoom = catchAsync(async (req,res,next) => {
@@ -48,14 +48,14 @@ module.exports.createScoreAPI = catchAsync(async (req,res,next) => {
 })
 
 // utwórz score dla uzytkownika i GameRoomu
-module.exports.createScore = catchAsync(async (data) => {
+module.exports.createScore = async (data) => {
     const score = await Score.create(data);
 
     return true;
-})
+}
 
 // zaktualizuj wynik dla użytkownika
-module.exports.updateScore = catchAsync(async (data) => {
+module.exports.updateScore = async (data) => {
     const {userId, gameRoomId, pointsToAdd} = data;
 
     const score = await Score.findOne({userId, gameRoomId});
@@ -67,7 +67,7 @@ module.exports.updateScore = catchAsync(async (data) => {
     const updatedScore = await Score.findOneAndUpdate({userId, gameRoomId},{points: newValue})
 
     return true;
-})
+}
 
 // zaktualizuj wynik dla użytkownika
 module.exports.updateScoreAPI = catchAsync(async (req,res,next) => {

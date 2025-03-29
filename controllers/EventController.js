@@ -1,9 +1,48 @@
 const Event = require('../models/EventModel');
 const catchAsync = require('../util/catchAsync');
 const AppError = require('../util/AppError');
+const checkBet = require('../util/checkBet');
+const updateScoreForUsers = require('../util/updateScoreForUsers')
 
 const Round = require('../models/RoundModel');
 const DocumentExists = require('../util/DocumentExists');
+
+module.exports.setScore = catchAsync(async (req,res,next) => {
+    const eventId = req.params.eventId;
+    const result = req.body.result;
+    const event = await Event.findById(eventId);
+
+    if(!event) return next(new AppError('Ther is no event with given Id', 404))
+    
+    if(event.correctResault !== '') return next(new AppError('Correct resault already exists for this event', 400))
+    //TODO - weryfikacja czy jestes ownerem gameRoom
+    
+
+    //poprawnosc wyniku - typ itp
+    const wrongType = checkBet(event,result);
+
+    if(!wrongType) return next(new AppError('Score is incorrect check if you placed correct type and value', 400))
+
+    //weryfikacja deadline
+    const round = (await Round.findById(event.roundId));
+
+    const requestTime = new Date(req.time).getTime();
+    const deadLineTime = new Date(round.deadLineDate).getTime();
+
+    if(deadLineTime > requestTime) return next(new AppError("U can't set Score before dead line time.",400))
+
+    //dodanie wyniku
+    const updatedEvent = await Event.findByIdAndUpdate(eventId,{correctResault: result});
+
+    //dodanie punktów uzytkownikom
+    const scoreUpdate = await updateScoreForUsers(eventId,result)
+
+    //zwrotka
+    res.status(200).json({
+        status: 'success',
+        scoreUpdated: scoreUpdate
+    })
+})
 
 //TODO - weryfikacja czy owner GameRoom dodaje eventy
 

@@ -31,7 +31,7 @@ module.exports.getGameRoomById = catchAsync(async (req, res, next) => {
 });
 
 module.exports.createGameRoom = catchAsync(async (req, res, next) => {
-    const data = {...req.body};
+    const data = {...req.body, correctResault: ''};
     const gameRoom = await GameRoom.create(data);
 
     //TODO - po autoryzacji dodanie Participation twórcy pokoju do utworzonego pokoju
@@ -45,7 +45,8 @@ module.exports.createGameRoom = catchAsync(async (req, res, next) => {
 });
 
 module.exports.updateGameRoomById = catchAsync(async (req, res, next) => {
-    const gameRoom = await GameRoom.findByIdAndUpdate(req.params.id, req.body, {
+    //Blokada updatu po dead line
+    const gameRoom = await GameRoom.findByIdAndUpdate(req.params.id, {...req.body,correctResault: ''}, {
         new: true,
         runValidators: true,
     });

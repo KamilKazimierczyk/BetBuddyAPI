@@ -1,6 +1,7 @@
 const Bet = require('../models/BetModel');
 const catchAsync = require('../util/catchAsync');
 const AppError = require('../util/AppError');
+const checkBet = require('../util/checkBet')
 
 const DocumentExists = require('../util/DocumentExists');
 const Event = require('../models/EventModel');
@@ -20,12 +21,17 @@ module.exports.placeBet = catchAsync(async (req, res, next) => {
     
     const participation = await Participation.findOne({gameRoomId: round.gameRoomId, userId: req.body.userId});
 
-    if(!participation) return next(new AppError('U need to be part of GameRoom to place a Bet.','403'))
+    if(!participation) return next(new AppError('U need to be part of GameRoom to place a Bet.',403))
     //weryfikacja deadline
     const requestTime = new Date(req.time).getTime();
     const deadLineTime = new Date(round.deadLineTime).getTime();
 
-    if(requestTime > deadLineTime) return next(new AppError("U can't place Bet after dead line time.",404))
+    if(requestTime > deadLineTime) return next(new AppError("U can't place Bet after dead line time.",400))
+
+    //weryfikacja poprawności betu [typu]
+    const wrongType = checkBet(event,req.body.betValue);
+
+    if(!wrongType) return next(new AppError('Bet is incorrect check if you placed correct type and value', 400))
 
     //dodanie betu
     const bet = await Bet.create(req.body);
@@ -52,6 +58,12 @@ module.exports.getBetFromEvent = catchAsync(async (req, res, next) => {
     });
 });
 
+module.exports.getBet = async (eventId,userId) => {
+    const bet = await Bet.findOne({userId,eventId});
+
+    return bet;
+}
+
 module.exports.updateBet = catchAsync(async (req,res,next) => {
     //czy użytkownik jest twórcą tego zakładu
     const userId = req.body.userId;
@@ -68,7 +80,12 @@ module.exports.updateBet = catchAsync(async (req,res,next) => {
     const requestTime = new Date(req.time).getTime();
     const deadLineTime = new Date(round.deadLineTime).getTime();
     
-    if(requestTime > deadLineTime) return next(new AppError("U can't place Bet after dead line time.",404))
+    if(requestTime > deadLineTime) return next(new AppError("U can't place Bet after dead line time.",400))
+
+    const wrongType = checkBet(event,req.body.betValue);
+
+    if(!wrongType) return next(new AppError('Bet is incorrect check if you placed correct type and value', 400))
+    
     //update betu
     const updatedBet = await Bet.findByIdAndUpdate(req.params.betId, req.body, {
         new: true,

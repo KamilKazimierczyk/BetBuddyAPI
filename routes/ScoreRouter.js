@@ -8,6 +8,5 @@ router.route('/').post(ScoreController.createScoreAPI)
 router.route('/:scoreId').get(ScoreController.getScoreLineById).patch(ScoreController.updateScoreAPI).delete(ScoreController.deleteScore);
 
 //TODO - endpointy pod dwie pierwsze metody Contollera
-//TODO - testy endpointów
 
 module.exports = router;
